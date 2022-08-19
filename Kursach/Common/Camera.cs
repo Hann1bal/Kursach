@@ -1,88 +1,58 @@
-﻿using OpenTK.Mathematics;
+﻿using System.Numerics;
+using Kursach.Common.MathHelperMethods;
 
-namespace GameTry.Common;
+namespace Kursach.Common;
 
 public class Camera
 {
-    // Those vectors are directions pointing outwards from the camera to define how it rotated.
-    private Vector3 _front = -Vector3.UnitZ;
+    public Vector3 Position { get; set; }
+    public Vector3 Front { get; set; }
 
-    private Vector3 _up = Vector3.UnitY;
+    public Vector3 Up { get; private set; }
+    public float AspectRatio { get; set; }
 
-    private Vector3 _right = Vector3.UnitX;
+    public float Yaw { get; set; } = -90f;
+    public float Pitch { get; set; }
 
-    // Rotation around the X axis (radians)
-    private float _pitch;
+    private float Zoom = 45f;
 
-    // Rotation around the Y axis (radians)
-    private float _yaw = -MathHelper.PiOver2; // Without this, you would be started rotated 90 degrees right.
-
-    // The field of view of the camera (radians)
-    private float _fov = MathHelper.PiOver2;
-
-    public Camera(Vector3 position, float aspectRatio)
+    public Camera(Vector3 position, Vector3 front, Vector3 up, float aspectRatio)
     {
         Position = position;
         AspectRatio = aspectRatio;
+        Front = front;
+        Up = up;
     }
 
-    public Vector3 Position { get; set; }
-
-    public float AspectRatio { private get; set; }
-
-    public Vector3 Front => _front;
-
-    public Vector3 Up => _up;
-
-    public Vector3 Right => _right;
-
-    public float Pitch
+    public void ModifyZoom(float zoomAmount)
     {
-        get => MathHelper.RadiansToDegrees(_pitch);
-        set
-        {
-            var angle = MathHelper.Clamp(value, -89f, 89f);
-            _pitch = MathHelper.DegreesToRadians(angle);
-            UpdateVectors();
-        }
+        //We don't want to be able to zoom in too close or too far away so clamp to these values
+        Zoom = Math.Clamp(Zoom - zoomAmount, 1.0f, 45f);
     }
 
-    public float Yaw
+    public void ModifyDirection(float xOffset, float yOffset)
     {
-        get => MathHelper.RadiansToDegrees(_yaw);
-        set
-        {
-            _yaw = MathHelper.DegreesToRadians(value);
-            UpdateVectors();
-        }
-    }
-    public float Fov
-    {
-        get => MathHelper.RadiansToDegrees(_fov);
-        set
-        {
-            var angle = MathHelper.Clamp(value, 1f, 90f);
-            _fov = MathHelper.DegreesToRadians(angle);
-        }
+        Yaw += xOffset;
+        Pitch -= yOffset;
+
+        //We don't want to be able to look behind us by going over our head or under our feet so make sure it stays within these bounds
+        Pitch = Math.Clamp(Pitch, -89f, 89f);
+
+        var cameraDirection = Vector3.Zero;
+        cameraDirection.X = MathF.Cos(MathHelper.DegreesToRadians(Yaw)) * MathF.Cos(MathHelper.DegreesToRadians(Pitch));
+        cameraDirection.Y = MathF.Sin(MathHelper.DegreesToRadians(Pitch));
+        cameraDirection.Z = MathF.Sin(MathHelper.DegreesToRadians(Yaw)) * MathF.Cos(MathHelper.DegreesToRadians(Pitch));
+
+        Front = Vector3.Normalize(cameraDirection);
     }
 
-    public Matrix4 GetViewMatrix()
+    public Matrix4x4 GetViewMatrix()
     {
-        return Matrix4.LookAt(Position, Position + _front, _up);
+        return Matrix4x4.CreateLookAt(Position, Position + Front, Up);
     }
 
-    public Matrix4 GetProjectionMatrix()
+    public Matrix4x4 GetProjectionMatrix()
     {
-        return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
-    }
-
-    private void UpdateVectors()
-    {
-        _front.X = MathF.Cos(_pitch) * MathF.Cos(_yaw);
-        _front.Y = MathF.Sin(_pitch);
-        _front.Z = MathF.Cos(_pitch) * MathF.Sin(_yaw);
-        _front = Vector3.Normalize(_front);
-        _right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
-        _up = Vector3.Normalize(Vector3.Cross(_right, _front));
+        return Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Zoom), AspectRatio, 0.1f, 100.0f);
     }
 }

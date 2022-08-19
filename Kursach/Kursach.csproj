@@ -5,10 +5,16 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTK" Version="4.7.4" />
+      <PackageReference Include="Silk.NET" Version="2.16.0" />
+      <PackageReference Include="Silk.NET.Core" Version="2.16.0" />
+      <PackageReference Include="Silk.NET.Input.Common" Version="2.16.0" />
+      <PackageReference Include="Silk.NET.Maths" Version="2.16.0" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.16.0" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
       <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     </ItemGroup>
 
@@ -31,6 +37,14 @@
       </Content>
       <None Remove="Resources\container.png" />
       <Content Include="Resources\container.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Resources\silk.png" />
+      <Content Include="Resources\silk.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Shaders\lighting.frag" />
+      <Content Include="Shaders\lighting.frag">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

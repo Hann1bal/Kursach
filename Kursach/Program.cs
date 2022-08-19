@@ -1,25 +1,16 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
+﻿using Silk.NET.Maths;
+using Silk.NET.Windowing;
 
 namespace Kursach;
 
-internal class Programm
+internal class Program
 {
     private static void Main(string[] args)
     {
-        var nativeWindowSettings = new NativeWindowSettings
-        {
-            Size = new Vector2i(1000, 1000),
-            Title = "FirstGameEngineTry",
-            Flags = ContextFlags.Offscreen
-        };
-        using (var game = new OpenGLEngine(GameWindowSettings.Default, nativeWindowSettings))
-        {
-            game.VSync = VSyncMode.Adaptive;
-            game.Run();
-        }
+        var options = WindowOptions.Default;
+        options.Size = new Vector2D<int>(800, 600);
+        options.Title = "LearnOpenGL with Silk.NET";
+        using var engine = new OpenGLEngine();
+        OpenGLEngine.Run(options);
     }
 }
